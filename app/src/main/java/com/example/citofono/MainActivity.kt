@@ -6,12 +6,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -45,6 +44,11 @@ data class Contact(
 @Composable
 fun ContactList(contacts: List<Contact>, onAddContact: () -> Unit, onContactClick: (String) -> Unit) {
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Citofono") }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddContact) {
                 Text("+")
@@ -61,13 +65,15 @@ fun ContactList(contacts: List<Contact>, onAddContact: () -> Unit, onContactClic
 
 @Composable
 fun ContactItem(contact: Contact, onClick: (String) -> Unit) {
-    Box(modifier = Modifier
-        .padding(8.dp)
-        .clickable { onClick(contact.phoneNumber) }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick(contact.phoneNumber) }
     ) {
         Column {
-            Text(text = contact.name, style = MaterialTheme.typography.bodyLarge)
-            Text(text = contact.phoneNumber, style = MaterialTheme.typography.bodyMedium)
+            Text(text = contact.name, style = MaterialTheme.typography.body1)
+            Text(text = contact.phoneNumber, style = MaterialTheme.typography.body2)
         }
     }
 }
@@ -105,7 +111,7 @@ fun loadContactsFromCsv(context: Context): List<Contact> {
     reader.useLines { lines ->
         lines.forEach { line ->
             val tokens = line.split(";")
-            if (tokens.size >= 3) {
+            if (tokens.size >= 2) {
                 val contact = Contact(
                     id = contacts.size,
                     name = tokens[0],
