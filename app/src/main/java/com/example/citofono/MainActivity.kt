@@ -2,8 +2,11 @@ package com.example.citofono
 
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.citofono.ui.theme.CitofonoTheme
 import java.io.BufferedReader
@@ -39,7 +43,7 @@ data class Contact(
 )
 
 @Composable
-fun ContactList(contacts: List<Contact>, onAddContact: () -> Unit) {
+fun ContactList(contacts: List<Contact>, onAddContact: () -> Unit, onContactClick: (String) -> Unit) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onAddContact) {
@@ -49,15 +53,23 @@ fun ContactList(contacts: List<Contact>, onAddContact: () -> Unit) {
     ) { innerPadding ->
         LazyColumn(modifier = Modifier.padding(innerPadding)) {
             items(contacts) { contact ->
-                ContactItem(contact)
+                ContactItem(contact, onClick = onContactClick)
             }
         }
     }
 }
 
 @Composable
-fun ContactItem(contact: Contact) {
-    Text(text = "${contact.name}: ${contact.phoneNumber}")
+fun ContactItem(contact: Contact, onClick: (String) -> Unit) {
+    Box(modifier = Modifier
+        .padding(8.dp)
+        .clickable { onClick(contact.phoneNumber) }
+    ) {
+        Column {
+            Text(text = contact.name, style = MaterialTheme.typography.bodyLarge)
+            Text(text = contact.phoneNumber, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 }
 
 @Composable
@@ -97,7 +109,7 @@ fun loadContactsFromCsv(context: Context): List<Contact> {
                 val contact = Contact(
                     id = contacts.size,
                     name = tokens[0],
-                    phoneNumber = tokens[1] // Aquí solo usa el primer número de celular
+                    phoneNumber = tokens[1]
                 )
                 contacts.add(contact)
             }
@@ -111,7 +123,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        contacts.addAll(loadContactsFromCsv(this)) // Cargar contactos desde el CSV
+        contacts.addAll(loadContactsFromCsv(this))
 
         setContent {
             CitofonoTheme {
@@ -123,9 +135,11 @@ class MainActivity : ComponentActivity() {
                         showAddContactForm = false
                     }
                 } else {
-                    ContactList(contacts) {
+                    ContactList(contacts, onAddContact = {
                         showAddContactForm = true
-                    }
+                    }, onContactClick = { phoneNumber ->
+                        Toast.makeText(this, "Clicked on: $phoneNumber", Toast.LENGTH_SHORT).show()
+                    })
                 }
             }
         }
