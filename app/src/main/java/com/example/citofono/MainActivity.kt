@@ -132,7 +132,7 @@ fun ContactItem(
     onCallClick: (String) -> Unit,
     onWhatsAppClick: (String) -> Unit,
     onSmsClick: (String) -> Unit
-    ) {
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -140,27 +140,27 @@ fun ContactItem(
     ) {
         Text(text = contact.name, style = MaterialTheme.typography.body1)
 
-        contact.phoneNumber.forEach { phoneNumber: String ->
+        contact.phoneNumber.forEachIndexed { index, phoneNumber ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "+56 $phoneNumber",
+                    text = "Teléfono ${index + 1}",
                     style = MaterialTheme.typography.body2,
                     modifier = Modifier.weight(1f)
-                    )
+                )
 
                 Row {
                     IconButton(onClick = { onCallClick(phoneNumber) }) {
                         Icon(imageVector = Icons.Default.Call, contentDescription = "Llamar")
                     }
-                    IconButton(onClick = {onWhatsAppClick(phoneNumber) }) {
+                    IconButton(onClick = { onWhatsAppClick(phoneNumber) }) {
                         Icon(imageVector = Icons.Default.Person, contentDescription = "WhatsApp")
                     }
-                    IconButton(onClick = {onSmsClick(phoneNumber) }) {
+                    IconButton(onClick = { onSmsClick(phoneNumber) }) {
                         Icon(imageVector = Icons.Default.Email, contentDescription = "Sms")
                     }
                 }
