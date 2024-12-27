@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -162,6 +163,13 @@ fun AdminScreen() {
                     }
                 ) {
                     Icon(Icons.Default.ExitToApp, contentDescription = "Exportar archivo")
+                }
+                FloatingActionButton(
+                    onClick = {
+                        exportFileToDownloads(context, "contactos.vcf")
+                    }
+                ) {
+                    Icon(Icons.Default.List, contentDescription = "Exportar VCF")
                 }
             }
         }
@@ -329,6 +337,45 @@ fun exportFileToDownloads(context: Context, fileName: String) {
     }
 }
 fun updateContactsAfterUpload(context: Context) {
-    val intent = Intent("com.example.citofono.UPDATE_CONTACTS")
-    context.sendBroadcast(intent)
+    val csvFile = File(context.filesDir, "contactos.csv")
+    if (!csvFile.exists()) return
+    try {
+        val contacts = mutableListOf<Contact>()
+        csvFile.bufferedReader().useLines { lines ->
+            lines.forEach { line ->
+                val parts = line.split(";")
+                if (parts.size >= 2) {
+                    val name = parts[0].trim()
+                    val phoneNumbers = parts.drop(1).map { it.trim() }
+
+                    val id = contacts.size 
+                    val department = name 
+                    contacts.add(Contact(id, name, phoneNumbers, department))
+                }
+
+            }
+        }
+        generateVcfFile(context, contacts)
+        Toast.makeText(context, "Archivo VCF generado correctamente", Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun generateVcfFile(context: Context, contacts: List<Contact>) {
+    val vcfFile = File(context.filesDir, "contactos.vcf")
+    val writer = FileWriter(vcfFile)
+    try {
+        contacts.forEach { contact ->
+            writer.appendLine("BEGIN:VCARD")
+            writer.appendLine("VERSION:3.0")
+            writer.appendLine("FN:${contact.name}")
+            contact.phoneNumber.forEach { phone ->
+                writer.appendLine("TEL:$phone")
+            }
+            writer.appendLine("END:VCARD")
+        }
+    } finally {
+        writer.close()
+    }
 }
