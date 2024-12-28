@@ -1,6 +1,7 @@
 package com.example.citofono
 
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
@@ -60,7 +61,6 @@ class AdminActivity : ComponentActivity() {
         if (requestCode == REQUEST_WRITE_CONTACTS_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Permiso para escribir contactos otorgado.", Toast.LENGTH_SHORT).show()
-                // Llama a la acción que requiere el permiso
                 updateContactsAfterUpload(this)
             } else {
                 Toast.makeText(this, "Permiso para escribir contactos denegado.", Toast.LENGTH_LONG).show()
@@ -71,7 +71,6 @@ class AdminActivity : ComponentActivity() {
 
 
 }
-
 
 @Composable
 fun AdminScreen(adminActivity: AdminActivity) {
@@ -169,7 +168,6 @@ fun AdminScreen(adminActivity: AdminActivity) {
                 ) {
                     Text("Seleccionar archivo CSV o Excel")
                 }
-
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -370,6 +368,7 @@ fun exportFileToDownloads(context: Context, fileName: String) {
         Toast.makeText(context, "Error al exportar el archivo", Toast.LENGTH_SHORT).show()
     }
 }
+
 fun updateContactsAfterUpload(context: Context) {
     val csvFile = File(context.filesDir, "contactos.csv")
     if (!csvFile.exists()) {
@@ -436,7 +435,6 @@ private fun addContactToPhone(name: String, phoneNumbers: List<String>, context:
             ?: throw Exception("Error al insertar contacto")
         val rawContactId = ContentUris.parseId(contactUri)
 
-        // Insertar nombre
         val nameValues = ContentValues().apply {
             put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
             put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
@@ -444,7 +442,6 @@ private fun addContactToPhone(name: String, phoneNumbers: List<String>, context:
         }
         contentResolver.insert(ContactsContract.Data.CONTENT_URI, nameValues)
 
-        // Insertar números de teléfono
         phoneNumbers.forEach { number ->
             val cleanedNumber = cleanPhoneNumber(number)
             val phoneValues = ContentValues().apply {
@@ -462,7 +459,6 @@ private fun addContactToPhone(name: String, phoneNumbers: List<String>, context:
 }
 
 private fun cleanPhoneNumber(phoneNumber: String): String {
-    // Elimina espacios y caracteres no válidos, dejando solo números y el símbolo '+'
     return phoneNumber.replace("[^+\\d]".toRegex(), "")
 }
 
@@ -476,15 +472,6 @@ fun checkAndRequestWriteContactsPermission(activity: Activity, onPermissionGrant
             REQUEST_WRITE_CONTACTS_PERMISSION
         )
     } else {
-        // Si el permiso ya está otorgado, continúa
         onPermissionGranted()
     }
 }
-
-
-
-
-
-
-
-
